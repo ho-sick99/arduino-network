@@ -7,6 +7,7 @@
 ┃ ┗ www.js
 ┣ 📂 images
 ┣ 📂 src
+┃ ┃ indes.ejs
 ┃ ┗ index.js
 ┣  app.js
 ┗  package.json

@@ -1,2 +1,2 @@
-const imageDirectory = __dirname; // 현재 파일 경로
+const imageDirectory = __dirname + "/images"; // 이미지 저장될 폴더 경로
 module.exports = { imageDirectory };

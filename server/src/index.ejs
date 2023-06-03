@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control system</title>
+</head>
+
+<body>
+  <h1>Control system</h1>
+  <ol>
+    <% files.forEach(file=> { %>
+      <li>
+        <a href="/data?file=<%= file.fileName %>"><%= file.time %></a>
+      </li>
+      <% }) %>
+  </ol>
+</body>
+
+</html>
