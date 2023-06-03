@@ -6,14 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control system</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
   <h1>Control system</h1>
   <hr>
-  <h2>촬영 시각 : <%= time %></h2>
-  <h2>가스 센서 값 : <%= gas %></h2>
-  <img src="<%= file %>" alt="Image">
+  <ol>
+    <% files.forEach(file=> { %>
+      <li>
+        <a href="/data?time=<%= file.time %>&file=<%= file.fileName %>"><%= file.time %></a>
+      </li>
+      <% }) %>
+  </ol>
 </body>
 
 </html>

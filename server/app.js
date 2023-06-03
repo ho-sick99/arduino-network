@@ -10,13 +10,16 @@ const home = require("./src");
 
 // App setting
 app.set('view engine', 'ejs'); // template engine
-app.set("views", "./src"); // view file path
+app.set("views", "./src/view"); // view file path
 
 // Middleware
 app.use(bodyParser.json({ extended: true })); // body-parser
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw({ extended: true }));
-app.use(express.static("images")); // static folder
+
+// static folder
+app.use(express.static(`${__dirname}/images`));
+app.use(express.static(`${__dirname}/src/css`));
 
 app.use("/", home);
 
