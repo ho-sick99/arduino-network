@@ -11,13 +11,9 @@
 <body>
   <h1>Control system</h1>
   <hr>
-  <ol>
-    <% files.forEach(file=> { %>
-      <li>
-        <a href="/data?time=<%= file.time %>&file=<%= file.fileName %>"><%= file.time %></a>
-      </li>
-      <% }) %>
-  </ol>
+  <h2>촬영 시각 : <%= time %></h2>
+  <h2>가스 센서 값 : <%= gas %></h2>
+  <img src="<%= file %>" alt="Image">
 </body>
 
 </html>

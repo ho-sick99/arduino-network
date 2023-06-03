@@ -26,6 +26,15 @@ router.get("/", async (req, res) => {
     return res.render('index', { files });
 })
 
+router.get("/data", async (req, res) => {
+    const file = req.query.file;
+    return res.render('data', {
+        time: req.query.time,
+        gas: file.split("_")[1],
+        file
+    });
+})
+
 router.post("/arduino", (req, res) => {
     const gas = req.body.gas; // 가스 센서값
     const base64Data = req.body.image;
