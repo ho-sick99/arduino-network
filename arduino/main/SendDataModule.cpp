@@ -16,5 +16,5 @@ void SendDataModule::send(HttpClient *client, int gas)
     postData += gas;
 
     // 서버로 post 요청
-    client->post("/", contentType, postData);
+    client->post("/arduino", contentType, postData);
 }

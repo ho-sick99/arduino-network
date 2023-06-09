@@ -12,8 +12,8 @@ byte mac[] = {
 };
 
 // Server address setting
-char serverAddress[] = "52.79.195.75"; // server address
-int port = 3000;                       // server port
+char serverAddress[] = "15.164.98.225"; // server address -> AWS EC2 IP
+int port = 80;                       // server port
 
 // Ethernet Client Setting
 EthernetClient c;
