@@ -7,6 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control system</title>
   <link rel="stylesheet" type="text/css" href="style.css">
+  <script>
+    setTimeout(() => { location.reload(); }
+      , 3000); // 3초에 한번씩 페이지 리로드
+  </script>
 </head>
 
 <body>
@@ -15,7 +19,9 @@
   <ol>
     <% files.forEach(file=> { %>
       <li>
-        <a href="/data?time=<%= file.time %>&file=<%= file.fileName %>"><%= file.time %></a>
+        <a href="/data?time=<%= file.time %>&file=<%= file.fileName %>">
+          <%= file.time %>
+        </a>
       </li>
       <% }) %>
   </ol>
