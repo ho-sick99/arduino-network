@@ -14,13 +14,13 @@
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 // RGB led 연결 핀
-int ledRed = 9;   // red
-int ledGreen = 8; // green
+const PROGMEM int ledRed = 9;   // red
+const PROGMEM int ledGreen = 8; // green
 
 // 가스 센서 3개 각각의 연결 핀
-int gas1 = A0; // 가스센서 1번 연결 핀
-int gas2 = A1; // 가스센서 2번 연결 핀
-int gas3 = A2; // 가스센서 3번 연결 핀
+const PROGMEM int gas1 = A0; // 가스센서 1번 연결 핀
+const PROGMEM int gas2 = A1; // 가스센서 2번 연결 핀
+const PROGMEM int gas3 = A2; // 가스센서 3번 연결 핀
 
 // 가스 센서 값
 int gasValue1 = 0; // 1번 가스 센서 값
@@ -28,23 +28,23 @@ int gasValue2 = 0; // 2번 가스 센서 값
 int gasValue3 = 0; // 3번 가스 센서 값
 
 // 피에조 부저 연결 핀
-int buzzer = 7;
+const PROGMEM int buzzer = 7;
 
 // 모터 연결 핀
-int motorA = 2;
-int motorB = 3;
+const PROGMEM int motorA = 2;
+const PROGMEM int motorB = 3;
 
 // 상태 변수 svState;
 int svState = 0;
 
 // 이더넷 연결 세팅 //
 // MAC address setting
-byte mac[] = {
+const PROGMEM byte mac[] = {
     0x12, 0xAC, 0xAD, 0xFF, 0x22, 0x37 // MAC address (example)
 };
 
 // Server address setting
-char serverAddress[] = "15.164.98.225"; // server address -> AWS EC2 IP
+const PROGMEM char serverAddress[] = "15.164.98.225"; // server address -> AWS EC2 IP
 int port = 80;                          // server port
 
 // Ethernet Client Setting
@@ -92,12 +92,6 @@ void loop()
     gasValue1 = analogRead(gas1);
     gasValue2 = analogRead(gas2);
     gasValue3 = analogRead(gas3);
-//    Serial.print("gas1 : ");
-//    Serial.print(gasValue1);   // 디폴트 : 약 197
-//    Serial.print(", gas2 : "); // 디폴트 : 약 190
-//    Serial.print(gasValue2);   // 디폴트 : 약 50
-//    Serial.print(", gas3 : ");
-//    Serial.println(gasValue3);
     digitalWrite(motorA, LOW);
     digitalWrite(motorB, LOW);
 

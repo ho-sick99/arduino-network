@@ -16,8 +16,8 @@ void SendDataModule::send(HttpClient *client, int gas, int lox, int mode)
     Serial.println();
 
     // Data 정의 -> 현재 테스트 데이터이며 추후에 사진 모듈 연동 성공시 사진 데이터를 base64 인코딩해서 전송예정
-    String contentType = "application/x-www-form-urlencoded";
-    String postData = "gas=" + String(gas) + "&lox=" + String(lox) + "&mode=" + String(mode);
+    const PROGMEM String contentType = "application/x-www-form-urlencoded";
+    const PROGMEM String postData = "gas=" + String(gas) + "&lox=" + String(lox) + "&mode=" + String(mode);
     // Serial.print(postData);
     // 서버로 post 요청
     client->post("/arduino", contentType, postData);
