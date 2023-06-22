@@ -4,7 +4,7 @@
 class SendDataModule
 {
 public:
-  void send(HttpClient *client, int gas);
+  void send(HttpClient *client, int gas, int lox, int mode);
 };
 
 #endif

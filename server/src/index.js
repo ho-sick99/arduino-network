@@ -33,16 +33,17 @@ router.get("/data", async (req, res) => {
     return res.render('data', {
         time: req.query.time,
         gas: data[0],
-        lox: data[1]
+        lox: data[1],
+        text: (data[2] == 0) ? '사람이 감지되었습니다.' : '가스가 감지되었습니다.'
     });
 })
 
 router.post("/arduino", (req, res) => {
-    const { gas, lox } = req.body; // 가스, 레이저 센서값
+    const { gas, lox, mode } = req.body; // 가스, 레이저 센서값, 모드
     const fileName = String(Date.now()) + "_" + nanoid(); // 파일 이름 '현재 시간_랜덤문자열'
     const filePath = path.join(imageDirectory, fileName); // 저장 경로 'images'
-    const fileData = gas + " " + lox;
-    fs.writeFile(filePath, fileData, err => { // 가스, 레이저 센서값 파일에 저장
+    const fileData = gas + " " + lox + " " + mode;
+    fs.writeFile(filePath, fileData, err => { // 가스, 레이저 센서값, 모드 파일에 저장
         if (err) {
             console.error('파일 저장 오류:', err);
             return res.sendStatus(500).send('서버 오류');
