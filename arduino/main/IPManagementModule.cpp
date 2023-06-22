@@ -11,9 +11,16 @@ void IPManagementModule::initIP(byte *mac)
         Serial.print(" ");
     }
     Serial.println();
-    if (Ethernet.begin(mac) == 0) // 연결 실패
+    Serial.println("이더넷 연결 시도");
+    int status = Ethernet.begin(mac);
+    Serial.print(status);
+    if (status == 1)
     {
-        Serial.println("Failed to configure Ethernet using DHCP");
+        Ethernet.localIP();
+    }
+    else if (status == 0) // 연결 실패
+    {
+        Serial.println("Failed to configure Ethernet using DHCP"); //
 
         // 예외처리
         if (Ethernet.hardwareStatus() == EthernetNoHardware)
@@ -24,6 +31,7 @@ void IPManagementModule::initIP(byte *mac)
         {
             Serial.println("Ethernet cable is not connected.");
         }
+        Serial.println("아두이노 정지");
 
         // 아두이노 정지
         while (true)
@@ -32,7 +40,6 @@ void IPManagementModule::initIP(byte *mac)
         }
     }
 }
-
 // IP 관리 메서드
 void IPManagementModule::maintainIP()
 {
