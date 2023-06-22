@@ -131,6 +131,7 @@ void loop()
 
         Serial.print("Gas value : ");
         Serial.print(maxValue);
+        Serial.println();
 
         // 이더넷 통신 시도 //
         ipManager.maintainIP(); // IP 체크

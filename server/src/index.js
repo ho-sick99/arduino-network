@@ -27,20 +27,22 @@ router.get("/", async (req, res) => {
 })
 
 router.get("/data", async (req, res) => {
-    const file = req.query.file;
+    const { file } = req.query;
+    const filePath = path.join(imageDirectory, file);
+    const data = (await fs.readFile(filePath, 'utf8')).split(" ");
     return res.render('data', {
         time: req.query.time,
-        gas: file.split("_")[1],
-        file
+        gas: data[0],
+        lox: data[1]
     });
 })
 
 router.post("/arduino", (req, res) => {
-    const gas = req.body.gas; // 가스 센서값
-    const encodedData = req.body.image; // Hex 이미지 데이터
-    const fileName = String(Date.now()) + "_" + gas + "_" + nanoid() + ".jpg"; // 파일 이름 '현재 시간_가스값_랜덤문자열_파일 확장자(jpg)'
+    const { gas, lox } = req.body; // 가스, 레이저 센서값
+    const fileName = String(Date.now()) + "_" + nanoid(); // 파일 이름 '현재 시간_랜덤문자열'
     const filePath = path.join(imageDirectory, fileName); // 저장 경로 'images'
-    fs.writeFile(filePath, Buffer.from(encodedData, 'hex'), err => { // Hex 이미지 데이터를 파일로 디코딩하여 저장
+    const fileData = gas + " " + lox;
+    fs.writeFile(filePath, fileData, err => { // 가스, 레이저 센서값 파일에 저장
         if (err) {
             console.error('파일 저장 오류:', err);
             return res.sendStatus(500).send('서버 오류');
