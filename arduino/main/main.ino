@@ -1,6 +1,5 @@
 #include <SoftwareSerial.h> //아두이노 2개 연결하기 위한 라이브러리
-#include <Servo.h>          //서보모터 라이브라리
-// #include "Adafruit_VL53L0X.h"
+#include "Adafruit_VL53L0X.h"
 
 // Ethernet Modules
 #include <ArduinoHttpClient.h>
@@ -12,7 +11,7 @@
 #include "IPManagementModule.h"
 #include "SendDataModule.h"
 
-// Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 // RGB led 연결 핀
 int ledRed = 9;   // red
@@ -31,19 +30,12 @@ int gasValue3 = 0; // 3번 가스 센서 값
 // 피에조 부저 연결 핀
 int buzzer = 7;
 
-// ??? 모터 연결 핀
+// 모터 연결 핀
 int motorA = 2;
 int motorB = 3;
 
-// 서보 모터 변수 및 상태 변수 svState;
-Servo sv;
+// 상태 변수 svState;
 int svState = 0;
-
-// AC모터 변수 및 상태 변수 acState
-int acState = 0;
-
-// 안전상태에서 부저 1회만 울리게 하기 위해 상태변수사용
-int isSafe = 1;
 
 // 이더넷 연결 세팅 //
 // MAC address setting
@@ -73,33 +65,26 @@ void setup()
     pinMode(ledRed, OUTPUT); // led는 출력센서.
     pinMode(ledGreen, OUTPUT);
     pinMode(motorA, OUTPUT);
-    pinMode(motorB, OUTPUT);
+    pinMode(motorB, OUTPUT); // 모터는 출력센서
     digitalWrite(motorA, LOW);
-    digitalWrite(motorB, LOW);
+    digitalWrite(motorB, LOW); // 모터 최초 상태 OFF
 
     while (!Serial) // 시리얼 포트 연결확인
     {
         delay(1); // 레이져 거리센서
     }
 
-    // // 이더넷 연결 시작 //
-     Serial.println("Initialize Ethernet with DHCP");
-     ipManager.initIP(mac); // IP 할당
+    // 이더넷 연결 시작 //
+    Serial.println("Initialize Ethernet with DHCP");
+    ipManager.initIP(mac); // IP 할당
+    // 이더넷 연결 완료 //
 
-    // Serial.print("My IP address: ");
-    // Serial.println(Ethernet.localIP()); // 할당받은 IP 주소 출력
-    // // 이더넷 연결 완료 //
-
-    Serial.println("Adafruit VL53L0X test");
-
-    //    if (!lox.begin())
-    //    {
-    //        Serial.println(F("Failed to boot VL53L0X"));
-    //        while (1)
-    //            ;
-    //    }
-    // power
-    Serial.println(F("VL53L0X API Simple Ranging example\n\n"));
+    if (!lox.begin())
+    {
+        Serial.println(F("Failed to boot VL53L0X"));
+        while (1)
+            ;
+    }
 }
 
 void loop()
@@ -107,46 +92,65 @@ void loop()
     gasValue1 = analogRead(gas1);
     gasValue2 = analogRead(gas2);
     gasValue3 = analogRead(gas3);
-    Serial.print("gas1 : ");
-    Serial.print(gasValue1);   // 디폴트 : 약 197
-    Serial.print(", gas2 : "); // 디폴트 : 약 190
-    Serial.print(gasValue2);   // 디폴트 : 약 50
-    Serial.print(", gas3 : ");
-    Serial.println(gasValue3);
+//    Serial.print("gas1 : ");
+//    Serial.print(gasValue1);   // 디폴트 : 약 197
+//    Serial.print(", gas2 : "); // 디폴트 : 약 190
+//    Serial.print(gasValue2);   // 디폴트 : 약 50
+//    Serial.print(", gas3 : ");
+//    Serial.println(gasValue3);
+    digitalWrite(motorA, LOW);
+    digitalWrite(motorB, LOW);
 
-    // VL53L0X_RangingMeasurementData_t measure;
+    VL53L0X_RangingMeasurementData_t measure;
 
-    // lox.rangingTest(&measure, false);
+    lox.rangingTest(&measure, false);
+    int distance = measure.RangeMilliMeter;
 
-    // 센서값 탐지 -> 센서 3개중 한개라도 100이상이면 if문 내부 동작
-    // if (measure.RangeMilliMeter < 300 && (gasValue1 > 230 || gasValue2 > 450 || gasValue3 > 130)) // -> 아래줄 이걸로 바꿔야해요
-    if (gasValue1 > 0)
-    { // 기준치 100으로 설정(적당히 바꾸세요)
-        delay(1000);
-        svState++;
+    // 최대 가스값 체크 (maxValue)
+    int maxValue = max(gasValue1, gasValue2);
+    maxValue = max(maxValue, gasValue3);
 
-        // 최대 가스값 체크
-        int maxValue = max(gasValue1, gasValue2);
-        maxValue = max(maxValue, gasValue3);
+    // 센서값 탐지 -> 가스 특정값 이상이면 내부 동작
+    if (gasValue1 > 230 || gasValue2 > 450 || gasValue3 > 130)
+    {
 
-        Serial.print("Gas value : ");
-        Serial.print(maxValue);
-        Serial.println();
+        if (distance < 300)
+        { // 거리 300이하
+            svState++;
 
-        // 이더넷 통신 시도 //
-        ipManager.maintainIP(); // IP 체크
+            //// 이더넷 통신//
+            ipManager.maintainIP(); // IP 체크
 
-        dataModule.send(&client, maxValue); // 최대 가스값 전송
+            dataModule.send(&client, maxValue, distance, 0); // 가스, 레이저 센서 값, 모드 전송
 
-        // 이더넷 통신 결과값 반환받기
-        int statusCode = client.responseStatusCode();
-        String response = client.responseBody();
+            // 이더넷 통신 결과값 반환받기
+            int statusCode = client.responseStatusCode();
+            String response = client.responseBody();
 
-        Serial.print("Status code: ");
-        Serial.println(statusCode); // 상태코드 출력
-        Serial.print("Response: ");
-        Serial.println(response); // 반환값 출력
-        // 이더넷 통신 완료 //
+            Serial.print("Status code: ");
+            Serial.println(statusCode); // 상태코드 출력
+            Serial.print("Response: ");
+            Serial.println(response); // 반환값 출력
+                                      ///// 이더넷 통신 완료 //
+        }
+        else
+        {
+            svState++;
+            //// 이더넷 통신//
+            ipManager.maintainIP(); // IP 체크
+
+            dataModule.send(&client, maxValue, distance, 1); // 가스, 레이저 센서 값, 모드 전송
+
+            // 이더넷 통신 결과값 반환받기
+            int statusCode = client.responseStatusCode();
+            String response = client.responseBody();
+
+            Serial.print("Status code: ");
+            Serial.println(statusCode); // 상태코드 출력
+            Serial.print("Response: ");
+            Serial.println(response); // 반환값 출력
+                                      ///// 이더넷 통신 완료 //
+        }
     }
     else
     {
@@ -164,19 +168,14 @@ void loop()
     {
         Serial.println("현재 안전합니다.");
 
-        // 카메라촬영 사진 이미지 넘기기 센서값 넘기기 이부분에 코드 추가
-
-        // 모터 작동
-
         // 녹색 점등, 적색 소등
         digitalWrite(ledGreen, HIGH);
         digitalWrite(ledRed, LOW);
+
+        // 모터 off
         digitalWrite(motorA, LOW);
         digitalWrite(motorB, LOW);
 
-        sv.write(1800); // 서보모터
-        delay(1000);
-        sv.detach(); // 서보모터 1초 동작 후 멈춤
     }
     else if (svState > 3)
     {
@@ -185,18 +184,16 @@ void loop()
         // 적색 점등, 녹색 소등
         digitalWrite(ledRed, HIGH);
         digitalWrite(ledGreen, LOW);
+
+        // 모터 on
         digitalWrite(motorA, HIGH);
         digitalWrite(motorB, LOW);
 
         // 피에조 작동
         tone(buzzer, 700, 10500);
 
-        // noTone(buzzer); //시끄러우면 끄는곳
+        // noTone(buzzer); //시끄러우면 끄기(임시코드)
 
-        // 서보모터
-        sv.write(0);
-        delay(1000);
-        sv.detach(); // 서보모터 1초 동작 후 멈춤
     }
 
     delay(1000);
