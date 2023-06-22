@@ -107,7 +107,6 @@ void loop()
     // 센서값 탐지 -> 가스 특정값 이상이면 내부 동작
     if (gasValue1 > 230 || gasValue2 > 450 || gasValue3 > 130)
     {
-
         if (distance < 300)
         { // 거리 300이하
             svState++;
@@ -145,6 +144,7 @@ void loop()
             Serial.println(response); // 반환값 출력
                                       ///// 이더넷 통신 완료 //
         }
+        delay(60000); // 1분 대기
     }
     else
     {
@@ -191,9 +191,4 @@ void loop()
     }
 
     delay(1000);
-
-    while (1) // 스핀락
-    {
-        delay(1); // 레이져 거리센서
-    }
 }
