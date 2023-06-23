@@ -5,7 +5,7 @@
 void IPManagementModule::initIP(byte *mac)
 {
     Serial.print("Mac ip address: "); // mac 주소 출력
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 7; i++)
     {
         Serial.print(mac[i], HEX);
         Serial.print(" ");
@@ -13,10 +13,11 @@ void IPManagementModule::initIP(byte *mac)
     Serial.println();
     Serial.println("이더넷 연결 시도");
     int status = Ethernet.begin(mac);
-    Serial.print(status);
+    Serial.println(status);
     if (status == 1)
     {
-        Ethernet.localIP();
+        Serial.print("My IP Address: ");
+        Serial.println(Ethernet.localIP());
     }
     else if (status == 0) // 연결 실패
     {

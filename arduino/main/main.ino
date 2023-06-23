@@ -27,6 +27,11 @@ int gasValue1 = 0; // 1번 가스 센서 값
 int gasValue2 = 0; // 2번 가스 센서 값
 int gasValue3 = 0; // 3번 가스 센서 값
 
+// 가스 센서 임계값
+const PROGMEM int gasLimit1 = 230; // 1번 센서
+const PROGMEM int gasLimit2 = 450; // 2번 센서
+const PROGMEM int gasLimit3 = 0; // 3번 센서
+
 // 피에조 부저 연결 핀
 const PROGMEM int buzzer = 7;
 
@@ -40,11 +45,11 @@ int svState = 0;
 // 이더넷 연결 세팅 //
 // MAC address setting
 const PROGMEM byte mac[] = {
-    0x12, 0xAC, 0xAD, 0xFF, 0x22, 0x37 // MAC address (example)
+    0x04, 0xBC, 0xAA, 0xF2, 0x32, 0x52 // MAC address (example)
 };
 
 // Server address setting
-const PROGMEM char serverAddress[] = "15.164.98.225"; // server address -> AWS EC2 IP
+char serverAddress[] = "15.164.98.225"; // server address -> AWS EC2 IP
 int port = 80;                          // server port
 
 // Ethernet Client Setting
@@ -76,7 +81,7 @@ void setup()
 
     // 이더넷 연결 시작 //
     Serial.println("Initialize Ethernet with DHCP");
-    ipManager.initIP(mac); // IP 할당
+    // ipManager.initIP(mac); // IP 할당
     // 이더넷 연결 완료 //
 
     if (!lox.begin())
@@ -85,13 +90,25 @@ void setup()
         while (1)
             ;
     }
+    
+    Serial.println(String(serverAddress));      // 시리얼 통신 초기화.
 }
 
 void loop()
 {
+    // 가스 센서값 측정
     gasValue1 = analogRead(gas1);
     gasValue2 = analogRead(gas2);
     gasValue3 = analogRead(gas3);
+
+    // 가스 센서값 출력
+    Serial.print("gas1 : ");
+    Serial.print(gasValue1);   // 디폴트 : 약 197
+    Serial.print(", gas2 : "); 
+    Serial.print(gasValue2);   // 디폴트 : 약 190
+    Serial.print(", gas3 : ");
+    Serial.println(gasValue3);  // 디폴트 : 약 50
+    
     digitalWrite(motorA, LOW);
     digitalWrite(motorB, LOW);
 
@@ -105,10 +122,24 @@ void loop()
     maxValue = max(maxValue, gasValue3);
 
     // 센서값 탐지 -> 가스 특정값 이상이면 내부 동작
-    if (gasValue1 > 230 || gasValue2 > 450 || gasValue3 > 130)
+    if (gasValue1 > gasLimit1 || gasValue2 > gasLimit2 || gasValue3 > gasLimit3)
     {
-        if (distance < 300)
-        { // 거리 300이하
+        // LED 점등
+        // 녹색 점등, 적색 소등
+        digitalWrite(ledGreen, LOW);
+        digitalWrite(ledRed, HIGH);
+        
+        // 피에조 부저 작동
+        tone(buzzer, 700, 10500);
+
+        // 모터 작동
+        // 모터 on
+        digitalWrite(motorA, HIGH);
+        digitalWrite(motorB, LOW);
+        
+        if (distance < 300) // 거리 300이하
+        { 
+            Serial.println("사람이 감지되었습니다.");
             svState++;
 
             //// 이더넷 통신//
@@ -124,10 +155,11 @@ void loop()
             Serial.println(statusCode); // 상태코드 출력
             Serial.print("Response: ");
             Serial.println(response); // 반환값 출력
-                                      ///// 이더넷 통신 완료 //
+            ///// 이더넷 통신 완료 //
         }
         else
         {
+            Serial.println("가스가 감지되었습니다.");
             svState++;
             //// 이더넷 통신//
             ipManager.maintainIP(); // IP 체크
@@ -142,53 +174,28 @@ void loop()
             Serial.println(statusCode); // 상태코드 출력
             Serial.print("Response: ");
             Serial.println(response); // 반환값 출력
-                                      ///// 이더넷 통신 완료 //
+            ///// 이더넷 통신 완료 //
         }
+        
         delay(60000); // 1분 대기
     }
     else
     {
-        delay(1000);
-        svState--;
-
-        if (svState < 0)
-        {
-            svState = 0;
-        }
-    }
-
-    // svState에 따라 작동 제어
-    if (svState == 1)
-    {
         Serial.println("현재 안전합니다.");
 
+        // LED
         // 녹색 점등, 적색 소등
         digitalWrite(ledGreen, HIGH);
         digitalWrite(ledRed, LOW);
 
+        // 모터
         // 모터 off
         digitalWrite(motorA, LOW);
         digitalWrite(motorB, LOW);
+        
+        noTone(buzzer); //시끄러우면 끄기(임시코드)
+        
+        delay(1000);
 
     }
-    else if (svState > 3)
-    {
-        Serial.println("경고!!! 실내 흡연자 발생!!");
-
-        // 적색 점등, 녹색 소등
-        digitalWrite(ledRed, HIGH);
-        digitalWrite(ledGreen, LOW);
-
-        // 모터 on
-        digitalWrite(motorA, HIGH);
-        digitalWrite(motorB, LOW);
-
-        // 피에조 작동
-        tone(buzzer, 700, 10500);
-
-        // noTone(buzzer); //시끄러우면 끄기(임시코드)
-
-    }
-
-    delay(1000);
 }
