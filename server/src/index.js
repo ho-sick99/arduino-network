@@ -39,6 +39,7 @@ router.get("/data", async (req, res) => {
 })
 
 router.post("/arduino", (req, res) => {
+    console.log(req.body);
     const { gas, lox, mode } = req.body; // 가스, 레이저 센서값, 모드
     const fileName = String(Date.now()) + "_" + nanoid(); // 파일 이름 '현재 시간_랜덤문자열'
     const filePath = path.join(imageDirectory, fileName); // 저장 경로 'images'
